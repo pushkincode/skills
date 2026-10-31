@@ -1,5 +1,5 @@
 ---
-name: project-spec-roadmap
+name: spec
 description: Gather project requirements, research the problem, and produce a detailed project specification and an actionable roadmap with independent review. Use when the user asks to plan a project, write its specification, or create a roadmap from an idea.
 ---
 
