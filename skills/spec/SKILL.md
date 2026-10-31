@@ -7,7 +7,13 @@ description: Gather project requirements, research the problem, and produce a de
 
 Turn a project idea into a detailed, evidence-based specification and an actionable roadmap. Follow the user's language for conversation and deliverables unless they request another language. Adapt depth and research to the project; do not invent facts, requirements, sources, or completed checks. This workflow plans work; do not implement the project unless separately requested.
 
-## 1. Gather context in rounds
+## 1. Preliminary research
+
+Before asking the first question, inspect the user's initial project idea and any relevant existing project files. Launch exactly one research subagent to browse the web for a brief overview of how this kind of project is typically built. When model selection and reliable cost information are available, use the cheapest suitable available model, following the model-selection rules below. Give the researcher the initial request, necessary non-sensitive context, and a focused task: identify the main approaches, common platforms and technologies, meaningful early tradeoffs, and a few authoritative sources. Ask for concise findings and links, not a full project design. Bring the results into the main context and use them to generate concrete, relevant answer choices in the first question round. Do not present typical approaches as user decisions or verified requirements.
+
+If web access or delegation is unavailable, say which capability is unavailable; use the available tools to research directly when possible, and do not invent sources or claim a subagent was used. If the user's initial description is too vague to identify what to research, ask only the minimum necessary question first, then research before the broader interview. Respect the interactive-question requirement below.
+
+## 2. Gather context in rounds
 
 First inspect relevant existing project files and the user's request. Gather the project's goals and other essential context through a built-in interactive question or user-input tool whenever one is available. Do not ask the user to write an open-ended project description in chat. For every question, generate concise, concrete, mutually exclusive answer choices tailored to the project and its current context; put the recommended choice first and explain its tradeoff briefly if the interface permits. Include a custom-answer option when the tool supports it. Use the tool's native option format and per-call limits, and batch related questions when supported. Do not repeat information already available.
 
@@ -19,7 +25,7 @@ Ask only questions whose answers can materially change the specification, archit
 
 Separate confirmed decisions, assumptions, and unresolved questions. If the user does not know an answer, offer a practical recommendation and explain its consequences; obtain their decision when it materially changes the product. If they decline to decide or explicitly ask to proceed, record a visible assumption or open decision and its impact. Never present a guess as an agreed requirement. Do not advance past a genuinely blocking missing decision without user direction.
 
-## 2. Research and delegation
+## 3. In-depth research and delegation
 
 Identify research topics from actual uncertainties and project needs, such as relevant products, technical approaches, integration documentation, or constraints. Delegate independent topics to separate research subagents in parallel when the environment permits. Give each a bounded question, the necessary project context, and a requested output: findings, primary-source links, dates when relevant, limitations, and recommendations. Do not send secrets or unnecessary private data. Collect and reconcile results in the main context; distinguish evidence from inference and flag conflicting or unverified claims. Do not claim research was performed if web access is unavailable.
 
@@ -27,17 +33,17 @@ When the environment exposes model selection and reliable information about avai
 
 If subagents are unavailable or prohibited, explain the limitation, research the topics sequentially with available tools, and label the result as non-delegated. If the user requires actual independent agents or a particular model as a condition of proceeding, ask how to continue rather than pretending the requirement was met.
 
-## 3. Draft the specification
+## 4. Draft the specification
 
 Delegate drafting to a low-cost suitable model when available, passing the confirmed context and research; otherwise draft in the current context and disclose the limitation. Produce a detailed, project-specific specification, proportionate to the project's complexity. Cover relevant items: problem and goals; users and roles; scope and exclusions; user journeys; functional requirements and acceptance criteria; data and integrations; architecture and technology decisions with rationale; security and privacy; reliability and operational requirements; testing; deployment; constraints; risks; assumptions; and unresolved decisions. Include sources for factual claims and do not invent precise details. Mark out-of-scope or not-yet-decided areas explicitly rather than filling sections with generic text.
 
-## 4. Independent review and revision
+## 5. Independent review and revision
 
 When supported, start a fresh, independent reviewer subagent with no prior conversation or drafting history. Give it only the draft specification, the minimum confirmed project requirements needed to assess it, and this task: find contradictions, missing requirements, unsupported assumptions, security or operational risks, and untestable acceptance criteria; return prioritized findings with concrete fixes. Do not pass the draft author's reasoning or conclusions. A fresh context still contains the provided specification and requirements; it is not literally empty.
 
 Use the strongest suitable available model for this review if model selection is supported. If a fresh reviewer cannot be launched, state that independent review is unavailable and perform a clearly labeled self-review; never claim independent or stronger-model review occurred. Consider each finding, apply valid corrections, explain material rejected or unresolved findings, and preserve decisions requiring the user's input. Delegate revisions to the low-cost drafting model when available.
 
-## 5. Create the roadmap
+## 6. Create the roadmap
 
 After revising the specification, have the low-cost drafting model create a roadmap when available; otherwise use the current model and disclose the limitation. Organize it into ordered phases and numbered tasks (1.1, 1.2, 1.3, 2.1, etc.). Use Markdown checkboxes for every task and phase checkpoint, for example `- [ ] 1.1 ...` and `- [ ] Checkpoint 1: ...`. Each task should describe an actionable outcome; include dependencies, validation and acceptance checks, and explicit checkpoints with observable completion criteria. Keep all boxes unchecked unless work has actually been verified as complete. Reflect open decisions and assumptions in the plan, and make sure requirements and risks map to work or are explicitly deferred.
 
