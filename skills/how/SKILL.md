@@ -1,5 +1,5 @@
 ---
-name: explain
+name: how
 description: Explain how the current project, a feature, or a code path works in plain language for a beginner. Use when the user wants to understand an existing codebase or how its parts work together.
 ---
 
