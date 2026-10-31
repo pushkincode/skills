@@ -5,7 +5,15 @@ description: Explain how the current project, a feature, or a code path works in
 
 # Explain the project
 
-Help the user understand their actual project, especially code created with AI agents. Respond in the user's language. Default to a beginner-friendly explanation in chat. Answer the specific question or cover the project as a whole when no narrower scope was given. This is read-only: do not edit code, run the application, install dependencies, or create documents unless the user requests it.
+Help the user understand their actual project, especially code created with AI agents. Respond in the user's language, in a short, natural conversation suited to a beginner. This is read-only: do not edit code, run the application, install dependencies, or create documents unless the user requests it.
+
+## Begin with a question
+
+If the user only asks to explain the project without naming a part or question, start with one short message: ask what they do not understand or want explained. Optionally give two or three brief examples from their project. Wait for their response; do not deliver an overview or a long explanation first. If the user already asked a specific question, start with that question rather than asking them to repeat it. If they explicitly request a full overview, respect that request.
+
+## Teach as a conversation
+
+Explain one small idea or one step of a real flow at a time. Use a few short sentences, one relevant everyday analogy if helpful, and a concrete connection to the user's project. End with at most one simple question or an invitation to continue, then wait for the user's response. Do not deliver a complete lesson, list every component, or ask several questions in one message. Adapt to the response: clarify misunderstandings kindly, explain more simply when needed, and proceed when the learner is ready. If they ask for more detail or a direct answer, give it without forcing a quiz. Avoid a condescending tone or exaggerated praise.
 
 ## Inspect before explaining
 
@@ -19,8 +27,8 @@ If a low-cost subagent can be selected, delegate bounded read-only inspection an
 
 ## Explain clearly
 
-Start with what the project or requested feature does for its user. Describe its main parts and how they interact, then walk through one real action from beginning to end, grounded in the actual code. Explain unfamiliar terms in everyday language when first used. Use concrete, familiar analogies where they make an idea clearer, explicitly map each analogy back to the real components, and avoid suggesting that the analogy is literally how the software works.
+After the user chooses a topic, start with what the requested feature does for its user. Over successive turns, describe relevant parts and how they interact, and when useful walk through a real action from beginning to end, grounded in the actual code. Explain unfamiliar terms in everyday language when first used. Use concrete, familiar analogies where they make an idea clearer, explicitly map each analogy back to the real components, and avoid suggesting that the analogy is literally how the software works.
 
 Link or cite the most useful file paths and line numbers where available, identifying what each does. Keep code excerpts short and only when they help. Distinguish verified behavior from inference, intended behavior, incomplete code, and unknowns; do not claim a service is running or a feature works solely because its code exists. If the project is empty or contains only plans, explain what is actually present rather than inventing an implementation.
 
-Make the answer approachable and proportionate: start with the big picture and the most important flow, not an exhaustive file-by-file tour. Let the user ask to explore any part in more detail. Create a guide file only if the user explicitly asks for one.
+Keep each message approachable and proportionate; expand only as the user asks or the conversation requires. Create a guide file only if the user explicitly asks for one.
