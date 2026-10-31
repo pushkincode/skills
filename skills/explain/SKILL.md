@@ -21,6 +21,12 @@ Assume a beginner does not know the names of frameworks, libraries, databases, p
 
 For example, instead of saying "the backend runs on Hono", explain: "Hono is a ready-made toolkit that helps the server receive requests and send answers. In this project it helps handle requests from the app," if the code confirms that role. For databases, explain the purpose before the product names: "A database is where the app keeps information. PGlite lets the project use a local database during development; PostgreSQL is the database used on the server," only if the project's configuration confirms those facts. These are examples of teaching style, not assumptions about every project.
 
+## Explain behavior before code
+
+The default audience is a person who may never have programmed. Start with what the person does and what the application does in response, in everyday words. Do not lead with function names, code expressions, paths, routes, frameworks, or a numbered call trace. Translate each necessary technical concept into familiar language: for example, "the page asks the server for your tasks", not "the component calls a hook that sends an API request". Keep the first explanation short and conversational, even when the implementation spans many files.
+
+For a calendar that actually works this way, a suitable first step is: "Когда ты открываешь календарь, страница просит приложение найти твои задачи. Приложение берёт их из хранилища и показывает на нужных датах. Хочешь разберём, как оно их находит?" This is a style example, not a claim about the user's project. Introduce actual code names or file links only when useful for the current step or when the learner asks; explain each in plain language. Never dump an implementation trace unless the learner explicitly asks for technical detail.
+
 ## Inspect before explaining
 
 Read the applicable project instructions. Inspect the relevant project structure, manifests, entry points, configuration and source code; for a feature, follow the relevant execution or data path across files. Use existing docs and tests as clues, but verify claims against implementation. For large repositories, sample the main components first and investigate only enough to answer; do not claim to have read every file. Avoid accessing or exposing secrets or personal data.
@@ -35,6 +41,6 @@ If a low-cost subagent can be selected, delegate bounded read-only inspection an
 
 After the user chooses a topic, start with what the requested feature does for its user. Over successive turns, describe relevant parts and how they interact, and when useful walk through a real action from beginning to end, grounded in the actual code. Explain unfamiliar terms in everyday language when first used. Use concrete, familiar analogies where they make an idea clearer, explicitly map each analogy back to the real components, and avoid suggesting that the analogy is literally how the software works.
 
-Link or cite the most useful file paths and line numbers where available, identifying what each does. Keep code excerpts short and only when they help. Distinguish verified behavior from inference, intended behavior, incomplete code, and unknowns; do not claim a service is running or a feature works solely because its code exists. If the project is empty or contains only plans, explain what is actually present rather than inventing an implementation.
+Keep track of the source files behind claims and provide relevant file paths and line numbers when they help the learner or when requested, without letting citations dominate the explanation. Keep code excerpts short and only when they help. Distinguish verified behavior from inference, intended behavior, incomplete code, and unknowns; do not claim a service is running or a feature works solely because its code exists. If the project is empty or contains only plans, explain what is actually present rather than inventing an implementation.
 
 Keep each message approachable and proportionate; expand only as the user asks or the conversation requires. Create a guide file only if the user explicitly asks for one.
