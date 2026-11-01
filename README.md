@@ -13,8 +13,12 @@
 npx github:pushkincode/skills
 ```
 
-Выберите агента. Установщик добавит навыки в текущий проект и общие правила в
-пользовательскую конфигурацию выбранного агента:
+Сначала выберите русский или английский язык, затем агента. Все дальнейшие
+вопросы и сообщения установщика будут показаны на выбранном языке. Глобальные
+правила также установятся на этом языке.
+
+Установщик добавит навыки в текущий проект и общие правила в пользовательскую
+конфигурацию выбранного агента:
 
 | Агент | Навыки проекта | Глобальные правила |
 |---|---|---|
@@ -44,15 +48,17 @@ Codex, Kimi и OpenCode получают управляемый блок вну�
 не перезаписываются. Символические ссылки внутри путей установки не
 поддерживаются.
 
-Для неинтерактивного запуска укажите агента:
+Для неинтерактивного запуска укажите язык и агента:
 
 ```bash
-npx github:pushkincode/skills --agent codex
-npx github:pushkincode/skills --agent claude
-npx github:pushkincode/skills --agent kimi
-npx github:pushkincode/skills --agent opencode
-npx github:pushkincode/skills --agent all
+npx github:pushkincode/skills --lang ru --agent codex
+npx github:pushkincode/skills --lang ru --agent claude
+npx github:pushkincode/skills --lang ru --agent kimi
+npx github:pushkincode/skills --lang ru --agent opencode
+npx github:pushkincode/skills --lang ru --agent all
 ```
+
+Для английской версии используйте `--lang en`.
 
 Установщик работает с навыками в папке, из которой запущен. Доступность
 отдельных функций навыков зависит от возможностей агента и модели.

@@ -26,6 +26,73 @@ const ruleTargets = {
 const claudeRulesRoot = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(homeRoot, '.claude'), 'rules', 'pushkincode');
 const blockStart = '<!-- pushkincode-rules:start -->';
 const blockEnd = '<!-- pushkincode-rules:end -->';
+let language;
+
+const messages = {
+  ru: {
+    usage: 'Использование: установщик [--lang ru|en] [--agent codex|claude|kimi|opencode|all]',
+    unknownArgs: 'Неизвестные или повторяющиеся параметры. Используйте --help.',
+    invalidLanguage: 'Неизвестный язык. Используйте ru или en.',
+    languagePrompt: 'Выберите язык / Choose language:\n1. Русский\n2. English',
+    languageQuestion: 'Выберите номер / Choose a number: ',
+    languageRequired: 'Укажите язык параметром --lang: ru или en.',
+    agentRequired: 'Выберите агента параметром --agent: codex, claude, kimi, opencode или all.',
+    agentPrompt: 'Для какого агента установить навыки и глобальные правила?\n1. Codex\n2. Claude Code\n3. Kimi Code\n4. OpenCode\n5. Для всех перечисленных',
+    agentQuestion: 'Выберите номер: ',
+    unknownAgent: 'Неизвестный агент. Используйте --help.',
+    invalidPath: 'Недопустимый путь: {path}',
+    symlink: 'Символическая ссылка не поддерживается: {path}',
+    unsupportedFile: 'Неподдерживаемый тип файла: {path}',
+    invalidManifest: 'Некорректный журнал установки. Файлы не изменены.',
+    unreadableManifest: 'Не удалось прочитать .pushkincode-skills.json. Файлы не изменены.',
+    unsupportedManifest: 'Неподдерживаемый журнал установки. Файлы не изменены.',
+    invalidRulesManifest: 'Некорректный журнал глобальных правил. Файлы не изменены.',
+    unreadableRulesManifest: 'Не удалось прочитать .pushkincode-rules.json. Файлы не изменены.',
+    unsupportedRulesManifest: 'Неподдерживаемый журнал глобальных правил. Файлы не изменены.',
+    malformedBlock: 'Повреждён управляемый блок правил PushkinCode. Файлы не изменены.',
+    noSkills: 'В пакете нет навыков.',
+    missingSkillFile: 'В навыке {skill} отсутствует SKILL.md.',
+    noRules: 'В пакете нет корректных файлов глобальных правил.',
+    conflicts: 'Установка остановлена: обнаружены существующие, изменённые или удалённые управляемые файлы. Ничего не перезаписано:',
+    done: 'Готово: навыки {skills}; глобальные правила для {agents}.',
+    restart: 'Начните новую сессию агента. Для обновления повторите команду установки.',
+    error: 'Ошибка',
+  },
+  en: {
+    usage: 'Usage: installer [--lang ru|en] [--agent codex|claude|kimi|opencode|all]',
+    unknownArgs: 'Unknown or duplicate arguments. Use --help.',
+    invalidLanguage: 'Unknown language. Use ru or en.',
+    languagePrompt: 'Выберите язык / Choose language:\n1. Русский\n2. English',
+    languageQuestion: 'Выберите номер / Choose a number: ',
+    languageRequired: 'Select a language with --lang: ru or en.',
+    agentRequired: 'Select an agent with --agent: codex, claude, kimi, opencode, or all.',
+    agentPrompt: 'Which agent should receive the skills and global rules?\n1. Codex\n2. Claude Code\n3. Kimi Code\n4. OpenCode\n5. All listed agents',
+    agentQuestion: 'Choose a number: ',
+    unknownAgent: 'Unknown agent. Use --help.',
+    invalidPath: 'Invalid path: {path}',
+    symlink: 'Symbolic link is not supported: {path}',
+    unsupportedFile: 'Unsupported file type: {path}',
+    invalidManifest: 'Invalid installation record. No files were changed.',
+    unreadableManifest: 'Cannot read .pushkincode-skills.json. No files were changed.',
+    unsupportedManifest: 'Unsupported installation record. No files were changed.',
+    invalidRulesManifest: 'Invalid global rules installation record. No files were changed.',
+    unreadableRulesManifest: 'Cannot read .pushkincode-rules.json. No files were changed.',
+    unsupportedRulesManifest: 'Unsupported global rules installation record. No files were changed.',
+    malformedBlock: 'Malformed PushkinCode rules block. No files were changed.',
+    noSkills: 'The package contains no skills.',
+    missingSkillFile: 'The {skill} skill has no SKILL.md.',
+    noRules: 'The package contains no valid global rule files.',
+    conflicts: 'Installation stopped: existing, changed, or deleted managed files were found. Nothing was overwritten:',
+    done: 'Done: skills {skills}; global rules for {agents}.',
+    restart: 'Start a new agent session. Run the installation command again to update.',
+    error: 'Error',
+  },
+};
+
+function textFor(key, values = {}) {
+  const template = messages[language || 'en'][key];
+  return template.replace(/\{(\w+)\}/g, (_, name) => values[name]);
+}
 
 const sha = (buffer) => createHash('sha256').update(buffer).digest('hex');
 const posix = (value) => value.split(path.sep).join('/');
@@ -39,13 +106,13 @@ async function statOrNull(location) {
 async function safePath(relative) {
   const segments = relative.split('/');
   if (!relative || segments.some((part) => !part || part === '.' || part === '..' || part.includes('\\'))) {
-    throw new Error(`Invalid path: ${relative}`);
+    throw new Error(textFor('invalidPath', { path: relative }));
   }
   let current = projectRoot;
   for (const segment of segments) {
     current = path.join(current, segment);
     const info = await statOrNull(current);
-    if (info?.isSymbolicLink()) throw new Error(`Symbolic link is not supported: ${posix(path.relative(projectRoot, current))}`);
+    if (info?.isSymbolicLink()) throw new Error(textFor('symlink', { path: posix(path.relative(projectRoot, current)) }));
   }
   return current;
 }
@@ -58,7 +125,7 @@ async function assertNoLinks(location) {
   for (const segment of relative.split(path.sep).filter(Boolean)) {
     current = path.join(current, segment);
     const info = await statOrNull(current);
-    if (info?.isSymbolicLink()) throw new Error(`Symbolic link is not supported: ${current}`);
+    if (info?.isSymbolicLink()) throw new Error(textFor('symlink', { path: current }));
   }
   return resolved;
 }
@@ -69,7 +136,7 @@ async function listFiles(directory, prefix = '') {
     const name = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) result.push(...await listFiles(path.join(directory, entry.name), name));
     else if (entry.isFile()) result.push(name);
-    else throw new Error(`Unsupported file type in skill: ${name}`);
+    else throw new Error(textFor('unsupportedFile', { path: name }));
   }
   return result.sort();
 }
@@ -77,12 +144,12 @@ async function listFiles(directory, prefix = '') {
 async function loadManifest() {
   const stat = await statOrNull(manifestPath);
   if (!stat) return { schema: 1, files: {} };
-  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('Invalid installation record. No files were changed.');
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(textFor('invalidManifest'));
   let data;
   try { data = JSON.parse(await readFile(manifestPath, 'utf8')); }
-  catch { throw new Error('Cannot read .pushkincode-skills.json. No files were changed.'); }
+  catch { throw new Error(textFor('unreadableManifest')); }
   if (data.schema !== 1 || !data.files || typeof data.files !== 'object' || Array.isArray(data.files)) {
-    throw new Error('Unsupported installation record. No files were changed.');
+    throw new Error(textFor('unsupportedManifest'));
   }
   return data;
 }
@@ -90,14 +157,14 @@ async function loadManifest() {
 async function loadRulesManifest() {
   const stat = await statOrNull(rulesManifestPath);
   if (!stat) return { schema: 1, files: {}, blocks: {} };
-  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('Invalid global rules installation record. No files were changed.');
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(textFor('invalidRulesManifest'));
   let data;
   try { data = JSON.parse(await readFile(rulesManifestPath, 'utf8')); }
-  catch { throw new Error('Cannot read .pushkincode-rules.json. No files were changed.'); }
+  catch { throw new Error(textFor('unreadableRulesManifest')); }
   if (data.schema !== 1 || !data.files || !data.blocks ||
       typeof data.files !== 'object' || Array.isArray(data.files) ||
       typeof data.blocks !== 'object' || Array.isArray(data.blocks)) {
-    throw new Error('Unsupported global rules installation record. No files were changed.');
+    throw new Error(textFor('unsupportedRulesManifest'));
   }
   return data;
 }
@@ -117,38 +184,72 @@ function replaceManagedBlock(existing, block) {
   if (start === -1 || end === -1 || end < start ||
       existing.indexOf(blockStart, start + blockStart.length) !== -1 ||
       existing.indexOf(blockEnd, end + blockEnd.length) !== -1) {
-    throw new Error('Malformed PushkinCode rules block. No files were changed.');
+    throw new Error(textFor('malformedBlock'));
   }
   return `${existing.slice(0, start)}${block}${existing.slice(end + blockEnd.length)}`;
 }
 
 async function main() {
   const args = process.argv.slice(2);
-  if (args.includes('--help')) {
-    console.log('Использование: установщик [--agent codex|claude|kimi|opencode|all]');
+  let choice;
+  let help = false;
+  let invalidArguments = false;
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (argument === '--help') {
+      help = true;
+    } else if (argument === '--lang' && !language && args[index + 1]) {
+      language = args[index + 1];
+      index += 1;
+    } else if (argument === '--agent' && !choice && args[index + 1]) {
+      choice = args[index + 1];
+      index += 1;
+    } else {
+      invalidArguments = true;
+    }
+  }
+  if (language && !Object.hasOwn(messages, language)) {
+    language = 'en';
+    throw new Error(textFor('invalidLanguage'));
+  }
+  if (invalidArguments) throw new Error(textFor('unknownArgs'));
+  if (help) {
+    if (language) console.log(textFor('usage'));
+    else console.log(`${messages.ru.usage}\n${messages.en.usage}`);
     return;
   }
-  let choice;
-  if (args.length) {
-    if (args.length !== 2 || args[0] !== '--agent') throw new Error('Неизвестные параметры. Используйте --help.');
-    choice = args[1];
-  } else {
-    if (!stdin.isTTY) throw new Error('Выберите агента параметром --agent: codex, claude, kimi, opencode или all.');
-    const prompt = createInterface({ input: stdin, output: stdout });
-    try {
-      console.log('Для какого агента установить скиллы и глобальные правила?\n1. Codex\n2. Claude Code\n3. Kimi Code\n4. OpenCode\n5. Для всех перечисленных');
-      const answer = (await prompt.question('Выберите номер: ')).trim();
-      choice = ({ '1': 'codex', '2': 'claude', '3': 'kimi', '4': 'opencode', '5': 'all' })[answer];
-    } finally { prompt.close(); }
+
+  if (!language && !stdin.isTTY) {
+    throw new Error(`${messages.ru.languageRequired} ${messages.en.languageRequired}`);
   }
-  if (choice !== 'all' && !Object.hasOwn(destinations, choice)) throw new Error('Неизвестный агент. Используйте --help.');
+  const prompt = stdin.isTTY ? createInterface({ input: stdin, output: stdout }) : null;
+  try {
+    if (!language) {
+      console.log(messages.en.languagePrompt);
+      const answer = (await prompt.question(messages.en.languageQuestion)).trim();
+      language = ({ '1': 'ru', '2': 'en' })[answer];
+      if (!language) {
+        language = 'en';
+        throw new Error(textFor('invalidLanguage'));
+      }
+    }
+    if (!choice) {
+      if (!prompt) throw new Error(textFor('agentRequired'));
+      console.log(textFor('agentPrompt'));
+      const answer = (await prompt.question(textFor('agentQuestion'))).trim();
+      choice = ({ '1': 'codex', '2': 'claude', '3': 'kimi', '4': 'opencode', '5': 'all' })[answer];
+    }
+  } finally {
+    prompt?.close();
+  }
+  if (choice !== 'all' && !Object.hasOwn(destinations, choice)) throw new Error(textFor('unknownAgent'));
   const selectedAgents = choice === 'all' ? Object.keys(destinations) : [choice];
   const roots = [...new Set(choice === 'all' ? Object.values(destinations) : [destinations[choice]])];
   const sourceRoot = path.join(packageRoot, 'skills');
   const skills = (await readdir(sourceRoot, { withFileTypes: true }))
     .filter((entry) => entry.isDirectory() && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.name))
     .map((entry) => entry.name).sort();
-  if (!skills.length) throw new Error('В пакете нет скиллов.');
+  if (!skills.length) throw new Error(textFor('noSkills'));
 
   await assertNoLinks(rulesManifestPath);
   const record = await loadManifest();
@@ -160,7 +261,7 @@ async function main() {
     for (const skill of skills) {
       const source = path.join(sourceRoot, skill);
       const sourceFiles = await listFiles(source);
-      if (!sourceFiles.includes('SKILL.md')) throw new Error(`В ${skill} отсутствует SKILL.md.`);
+      if (!sourceFiles.includes('SKILL.md')) throw new Error(textFor('missingSkillFile', { skill }));
       const targetDirectory = `${root}/${skill}`;
       const targetInfo = await statOrNull(await safePath(targetDirectory));
       if (targetInfo && !targetInfo.isDirectory()) { conflicts.push(targetDirectory); continue; }
@@ -186,7 +287,7 @@ async function main() {
       }
     }
   }
-  const rulesSourceRoot = path.join(packageRoot, 'rules');
+  const rulesSourceRoot = path.join(packageRoot, 'rules', language);
   const ruleFiles = await listFiles(rulesSourceRoot);
   ruleFiles.sort((left, right) => {
     if (left === 'general.md') return -1;
@@ -194,7 +295,7 @@ async function main() {
     return left.localeCompare(right);
   });
   if (!ruleFiles.length || ruleFiles.some((item) => !item.endsWith('.md'))) {
-    throw new Error('В пакете нет корректных файлов глобальных правил.');
+    throw new Error(textFor('noRules'));
   }
   const ruleContents = new Map();
   for (const item of ruleFiles) {
@@ -234,7 +335,7 @@ async function main() {
     ruleActions.push({ type: 'block', agent, target, content: replaceManagedBlock(existing, block), block });
   }
   if (conflicts.length) {
-    console.error('Установка остановлена: обнаружены существующие, изменённые или удалённые управляемые файлы. Ничего не перезаписано:');
+    console.error(textFor('conflicts'));
     for (const item of [...new Set(conflicts)]) console.error(`  ${item}`);
     process.exitCode = 1;
     return;
@@ -256,8 +357,12 @@ async function main() {
   rulesRecord.source = record.source;
   await writeFile(manifestPath, `${JSON.stringify(record, null, 2)}\n`);
   await writeFile(rulesManifestPath, `${JSON.stringify(rulesRecord, null, 2)}\n`);
-  console.log(`Готово: скиллы ${skills.join(', ')}; глобальные правила для ${selectedAgents.join(', ')}.`);
-  console.log('Начните новую сессию агента. Для обновления повторите команду установки.');
+  console.log(textFor('done', { skills: skills.join(', '), agents: selectedAgents.join(', ') }));
+  console.log(textFor('restart'));
 }
 
-main().catch((error) => { console.error(`Ошибка: ${error.message}`); process.exitCode = 1; });
+main().catch((error) => {
+  const label = language ? textFor('error') : 'Ошибка / Error';
+  console.error(`${label}: ${error.message}`);
+  process.exitCode = 1;
+});

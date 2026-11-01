@@ -1,6 +1,6 @@
 {
   "name": "pushkincode-skills",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Install PushkinCode skills and global agent rules",
   "type": "module",
   "bin": { "pushkincode-skills": "./bin/install.mjs" },

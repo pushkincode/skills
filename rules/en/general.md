@@ -1,8 +1,7 @@
 # General working rules
 
-- Reply in Russian.
-- Always address the user with the formal "Вы", in a respectful tone.
-  Don't open replies with a fixed salutation.
+- When replying in Russian, address the user with the formal "Вы" and maintain
+  a respectful tone. Don't open replies with a fixed salutation.
 - Don't create files if you can edit existing ones.
 - Never commit or push without an explicit request.
 - Before a large change, briefly say what you're about to do.

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const installer = fileURLToPath(new URL('../bin/install.mjs', import.meta.url));
 const fakeHome = (cwd) => path.join(cwd, '.test-home');
-const runWith = (installerPath, cwd, agent) => {
+const runWith = (installerPath, cwd, agent, language = 'en') => {
   const home = fakeHome(cwd);
   const env = {
     ...process.env,
@@ -19,7 +19,7 @@ const runWith = (installerPath, cwd, agent) => {
     KIMI_CODE_HOME: path.join(home, '.kimi-code'),
     XDG_CONFIG_HOME: path.join(home, '.config'),
   };
-  return spawnSync(process.execPath, [installerPath, '--agent', agent], { cwd, encoding: 'utf8', env });
+  return spawnSync(process.execPath, [installerPath, '--lang', language, '--agent', agent], { cwd, encoding: 'utf8', env });
 };
 const run = (cwd, agent) => runWith(installer, cwd, agent);
 
@@ -73,7 +73,7 @@ test('updates unmodified installed skills from a newer package', async () => {
   assert.equal(runCopy().status, 0);
   const updated = '---\nname: how\ndescription: updated\n---\nNew version\n';
   await writeFile(path.join(packageCopy, 'skills/how/SKILL.md'), updated);
-  await writeFile(path.join(packageCopy, 'rules/general.md'), '# Updated global rule\n');
+  await writeFile(path.join(packageCopy, 'rules/en/general.md'), '# Updated global rule\n');
   assert.equal(runCopy().status, 0);
   assert.equal(await readFile(path.join(project, '.agents/skills/how/SKILL.md'), 'utf8'), updated);
   assert.match(await readFile(path.join(fakeHome(project), '.codex/AGENTS.md'), 'utf8'), /Updated global rule/);
@@ -112,4 +112,28 @@ test('does not overwrite a locally edited global rules block', async () => {
   await writeFile(target, edited);
   assert.notEqual(run(project, 'codex').status, 0);
   assert.equal(await readFile(target, 'utf8'), edited);
+});
+
+test('installs Russian rules and uses Russian output', async () => {
+  const project = await mkdtemp(path.join(tmpdir(), 'pushkin skills test '));
+  const result = runWith(installer, project, 'codex', 'ru');
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Готово:/);
+  const rules = await readFile(path.join(fakeHome(project), '.codex/AGENTS.md'), 'utf8');
+  assert.match(rules, /# Общие правила работы/);
+  assert.match(rules, /# Общие правила работы/);
+});
+
+test('switches installed rules to another language', async () => {
+  const project = await mkdtemp(path.join(tmpdir(), 'pushkin skills test '));
+  assert.equal(runWith(installer, project, 'all', 'en').status, 0);
+  assert.equal(runWith(installer, project, 'all', 'ru').status, 0);
+  assert.match(
+    await readFile(path.join(fakeHome(project), '.codex/AGENTS.md'), 'utf8'),
+    /# Общие правила работы/,
+  );
+  assert.match(
+    await readFile(path.join(fakeHome(project), '.claude/rules/pushkincode/general.md'), 'utf8'),
+    /# Общие правила работы/,
+  );
 });
