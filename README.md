@@ -1,64 +1,68 @@
 # PushkinCode Skills
 
-Навыки и общие правила для работы с проектами. `spec` помогает подготовить
-спецификацию и дорожную карту, `how` — разобраться в устройстве проекта. Общие
-правила автоматически применяются во всех проектах выбранного агента.
+**English** | [Русский](README.ru.md)
 
-## Установка
+Skills and shared rules for working with projects. `spec` helps prepare a
+specification and roadmap, while `how` explains how a project works. Shared
+rules apply automatically in every project opened with the selected agent.
 
-Нужны Node.js 18 или новее, npm, Git и доступ к GitHub. Откройте терминал в
-папке проекта и выполните одну команду:
+## Installation
+
+Requirements: Node.js 18 or newer, npm, Git, and access to GitHub. Open a
+terminal in your project directory and run:
 
 ```bash
 npx github:pushkincode/skills
 ```
 
-Сначала выберите русский или английский язык, затем агента. Все дальнейшие
-вопросы и сообщения установщика будут показаны на выбранном языке. Глобальные
-правила также установятся на этом языке.
+First select Russian or English, then select an agent. All subsequent prompts
+and installer messages use the selected language. The global rule files are
+installed in that language as well.
 
-Установщик добавит навыки в текущий проект и общие правила в пользовательскую
-конфигурацию выбранного агента:
+The installer adds skills to the current project and shared rules to the user
+configuration of the selected agent:
 
-| Агент | Навыки проекта | Глобальные правила |
+| Agent | Project skills | Global rules |
 |---|---|---|
-| Codex | `.agents/skills` | `$CODEX_HOME/AGENTS.md` или `~/.codex/AGENTS.md` |
-| Claude Code | `.claude/skills` | `$CLAUDE_CONFIG_DIR/rules/pushkincode` или `~/.claude/rules/pushkincode` |
-| Kimi Code CLI | `.agents/skills` | `$KIMI_CODE_HOME/AGENTS.md` или `~/.kimi-code/AGENTS.md` |
-| OpenCode | `.agents/skills` | `$XDG_CONFIG_HOME/opencode/AGENTS.md` или `~/.config/opencode/AGENTS.md` |
+| Codex | `.agents/skills` | `$CODEX_HOME/AGENTS.md` or `~/.codex/AGENTS.md` |
+| Claude Code | `.claude/skills` | `$CLAUDE_CONFIG_DIR/rules/pushkincode` or `~/.claude/rules/pushkincode` |
+| Kimi Code CLI | `.agents/skills` | `$KIMI_CODE_HOME/AGENTS.md` or `~/.kimi-code/AGENTS.md` |
+| OpenCode | `.agents/skills` | `$XDG_CONFIG_HOME/opencode/AGENTS.md` or `~/.config/opencode/AGENTS.md` |
 
-Codex, Kimi и OpenCode получают управляемый блок внутри глобального
-`AGENTS.md`; существующий текст вне этого блока сохраняется. Claude Code
-получает отдельные файлы правил.
+Codex, Kimi, and OpenCode receive a managed block inside the global
+`AGENTS.md`; existing text outside that block is preserved. Claude Code
+receives separate rule files.
 
-В Codex навыки вызываются как `$spec` и `$how`, в Claude Code — `/spec` и
-`/how`, в Kimi Code CLI — `/skill:spec` и `/skill:how`. Если навыки или правила
-не появились в текущей сессии, начните новую.
+In Codex, invoke skills as `$spec` and `$how`; in Claude Code, use `/spec` and
+`/how`; in Kimi Code CLI, use `/skill:spec` and `/skill:how`. Start a new agent
+session if newly installed skills or rules are not visible in the current one.
 
-## Обновление и безопасность
+## Updates and safety
 
-Для обновления повторите команду и выберите тех же агентов. Установщик хранит
-хеши установленных файлов:
+To update, run the same command again and select the same agents. The installer
+stores hashes of installed files in:
 
-- `.pushkincode-skills.json` — навыки текущего проекта;
-- `~/.pushkincode-rules.json` — глобальные правила пользователя.
+- `.pushkincode-skills.json` for skills in the current project;
+- `~/.pushkincode-rules.json` for global user rules.
 
-Если управляемый файл был изменён или удалён вручную, установка остановится до
-перезаписи любых файлов. Чужие навыки, правила и текст вне управляемого блока
-не перезаписываются. Символические ссылки внутри путей установки не
-поддерживаются.
+If a managed file was changed or deleted manually, installation stops before
+overwriting any files. Skills and rules from other sources, and text outside a
+managed block, are never overwritten. Symbolic links inside installation paths
+are not supported.
 
-Для неинтерактивного запуска укажите язык и агента:
+For non-interactive installation, specify the language and agent:
 
 ```bash
-npx github:pushkincode/skills --lang ru --agent codex
-npx github:pushkincode/skills --lang ru --agent claude
-npx github:pushkincode/skills --lang ru --agent kimi
-npx github:pushkincode/skills --lang ru --agent opencode
-npx github:pushkincode/skills --lang ru --agent all
+npx github:pushkincode/skills --lang en --agent codex
+npx github:pushkincode/skills --lang en --agent claude
+npx github:pushkincode/skills --lang en --agent kimi
+npx github:pushkincode/skills --lang en --agent opencode
+npx github:pushkincode/skills --lang en --agent all
 ```
 
-Для английской версии используйте `--lang en`.
+Use `--lang ru` to install the Russian rule set and receive installer messages
+in Russian.
 
-Установщик работает с навыками в папке, из которой запущен. Доступность
-отдельных функций навыков зависит от возможностей агента и модели.
+The installer writes project skills into the directory where it is run.
+Individual skill features depend on the capabilities of the selected agent and
+model.
