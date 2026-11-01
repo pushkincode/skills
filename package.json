@@ -1,0 +1,10 @@
+{
+  "name": "pushkincode-skills",
+  "version": "0.1.0",
+  "description": "Install and update PushkinCode skills in a project",
+  "type": "module",
+  "bin": { "pushkincode-skills": "./bin/install.mjs" },
+  "engines": { "node": ">=18" },
+  "files": ["bin", "skills", "LICENSE", "README.md"],
+  "license": "MIT"
+}
