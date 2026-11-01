@@ -1,10 +1,10 @@
 {
   "name": "pushkincode-skills",
-  "version": "0.1.0",
-  "description": "Install and update PushkinCode skills in a project",
+  "version": "0.2.0",
+  "description": "Install PushkinCode skills and global agent rules",
   "type": "module",
   "bin": { "pushkincode-skills": "./bin/install.mjs" },
   "engines": { "node": ">=18" },
-  "files": ["bin", "skills", "LICENSE", "README.md"],
+  "files": ["bin", "skills", "rules", "LICENSE", "README.md"],
   "license": "MIT"
 }
